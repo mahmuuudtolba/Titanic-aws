@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Titanic Survival Prediction 🚢</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 min-h-screen flex items-center justify-center p-4">
+
+  <div class="w-full max-w-2xl bg-white shadow-lg rounded-2xl p-8">
+    <h2 class="text-3xl font-bold text-center text-indigo-600 mb-6">🧬 Titanic Survival Prediction</h2>
+
+    <form method="POST" class="space-y-4">
+      <!-- Numeric Inputs -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Pclass</label>
+        <select name="num__Pclass" required class="w-full mt-1 px-4 py-2 border rounded-md">
+          <option value="1">1st Class</option>
+          <option value="2">2nd Class</option>
+          <option value="3">3rd Class</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Sex</label>
+        <select name="num__Sex" required class="w-full mt-1 px-4 py-2 border rounded-md">
+          <option value="0">Female</option>
+          <option value="1">Male</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Age</label>
+        <input type="number" name="num__Age" step="any" required class="w-full mt-1 px-4 py-2 border rounded-md">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Fare</label>
+        <input type="number" name="num__Fare" step="any" required class="w-full mt-1 px-4 py-2 border rounded-md">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Embarked</label>
+        <select name="num__Embarked" required class="w-full mt-1 px-4 py-2 border rounded-md">
+          <option value="0">Cherbourg (C)</option>
+          <option value="1">Queenstown (Q)</option>
+          <option value="2">Southampton (S)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Family Size</label>
+        <input type="number" name="num__Familysize" required class="w-full mt-1 px-4 py-2 border rounded-md">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Is Alone</label>
+        <select name="num__Isalone" required class="w-full mt-1 px-4 py-2 border rounded-md">
+          <option value="1">Yes</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Has Cabin</label>
+        <select name="num__HasCabin" required class="w-full mt-1 px-4 py-2 border rounded-md">
+          <option value="1">Yes</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Title</label>
+        <select name="num__Title" required class="w-full mt-1 px-4 py-2 border rounded-md">
+          <option value="0">Mr</option>
+          <option value="1">Mrs</option>
+          <option value="2">Miss</option>
+          <option value="3">Master</option>
+          <option value="4">Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Pclass_Fare</label>
+        <input type="number" name="num__Pclass_Fare" step="any" required class="w-full mt-1 px-4 py-2 border rounded-md">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Age_Fare</label>
+        <input type="number" name="num__Age_Fare" step="any" required class="w-full mt-1 px-4 py-2 border rounded-md">
+      </div>
+
+      <!-- Submit Button -->
+      <div class="text-center mt-6">
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full text-lg font-semibold shadow-md transition">Predict</button>
+      </div>
+    </form>
+
+    {% if prediction is not none %}
+    <div class="mt-6 p-4 bg-gray-100 border-l-4 {% if prediction == 0 %}border-red-500{% else %}border-green-500{% endif %} rounded">
+      {% if prediction == 0 %}
+      <p class="text-red-600 font-medium">❌ The passenger likely did <strong>not</strong> survive.</p>
+      {% elif prediction == 1 %}
+      <p class="text-green-600 font-medium">✅ The passenger likely <strong>survived</strong>.</p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+</body>
+</html>
