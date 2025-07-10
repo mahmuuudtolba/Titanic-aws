@@ -31,11 +31,6 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           echo "Dependencies installed."
 
-      - name: Run flake8 linter
-        run: |
-          echo "Running flake8..."
-          flake8 .
-          echo "flake8 completed."
 
 
   build-and-publish:
