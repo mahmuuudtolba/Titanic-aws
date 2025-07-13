@@ -11,3 +11,4 @@ flask==3.1.1
 lightgbm==4.6.0
 boto3==1.39.4
 imbalanced-learn==0.13.0
+pytest==7.4.3

@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -27,14 +27,44 @@ jobs:
         run: |
           echo "Installing dependencies..."
           python -m pip install --upgrade pip
-          pip install flake8 pytest
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -r requirements.txt
+          echo "Dependencies installed."
+
+      - name: Run simple tests
+        run: |
+          echo "Running simple tests..."
+          python run_simple_tests.py
+          echo "✅ Simple tests completed"
+
+      - name: Run pytest on simple tests
+        run: |
+          echo "Running pytest on simple tests..."
+          pytest tests/test_simple.py -v
+          echo "✅ Pytest completed"
+
+  build-and-test:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
           echo "Dependencies installed."
 
 
 
   build-and-publish:
-    needs: build-and-test
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

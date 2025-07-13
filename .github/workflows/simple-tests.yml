@@ -1,0 +1,50 @@
+name: Simple Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          echo "Dependencies installed."
+
+      - name: Check if source files exist
+        run: |
+          echo "Checking if source files exist..."
+          ls -la src/
+          ls -la application.py
+          echo "✅ Source files check completed"
+
+      - name: Run simple tests
+        run: |
+          echo "Running simple tests..."
+          python run_simple_tests.py
+          echo "✅ Simple tests completed"
+
+      - name: Run pytest directly
+        run: |
+          echo "Running pytest on simple tests..."
+          pytest tests/test_simple.py -v
+          echo "✅ Pytest completed"
+
+      - name: Test success message
+        run: |
+          echo "🎉 All tests passed successfully!"
+          echo "This is a simple test workflow for beginners." 
