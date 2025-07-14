@@ -85,7 +85,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
-          container-name: AI-agent-container # Make sure this matches your task definition
+          container-name: titanic-contianer # Make sure this matches your task definition
           image: ${{ needs.build-and-push.outputs.image }}
 
       - name: Deploy to ECS
