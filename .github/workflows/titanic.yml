@@ -57,7 +57,7 @@ jobs:
       - name: Build and push Docker image to ECR
         id: docker_build
         run: |
-          IMAGE_TAG="${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}"
+          IMAGE_TAG="${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest"
           
           # Build the image using the secure secret mount
           docker build --secret id=aws,src=/tmp/.aws/credentials -t $IMAGE_TAG .
@@ -86,7 +86,7 @@ jobs:
         with:
           task-definition: task-definition.json
           container-name: titanic-contianer # Make sure this matches your task definition
-          image: ${{ needs.build-and-push.outputs.image }}
+          image: "${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest"
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1 
