@@ -51,7 +51,7 @@ class DataProcessor:
 
         except Exception as e:
             logger.error(f"Error while preprocessing data {e}")
-            raise CustomException(str(e))
+            raise CustomException(str(e) , e)
         
 
 

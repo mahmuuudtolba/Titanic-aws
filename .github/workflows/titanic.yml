@@ -1,6 +1,4 @@
-
-
-name: CI/CD for dockerized AI-Agent-accent
+name: Build, Push, and Deploy to AWS
 
 on:
   push:
@@ -9,11 +7,14 @@ on:
     branches: [ "main" ]
 
 permissions:
-  contents: read
+  id-token: write  # Required for OIDC
+  contents: read   # Required to checkout the code
 
 jobs:
-  test:
+  build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,124 +24,73 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install dependencies
+      - name: Install dependencies for testing
         run: |
-          echo "Installing dependencies..."
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          echo "Dependencies installed."
+      
+      - name: Run tests
+        run: python run_tests.py
 
-      - name: Run simple tests
-        run: |
-          echo "Running simple tests..."
-          python run_simple_tests.py
-          echo "✅ Simple tests completed"
-
-      - name: Run pytest on simple tests
-        run: |
-          echo "Running pytest on simple tests..."
-          pytest tests/test_simple.py -v
-          echo "✅ Pytest completed"
-
-  build-and-test:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          python-version: "3.10"
+          # Use ONE secret for the full ARN of the IAM Role
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }} 
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Install dependencies
-        run: |
-          echo "Installing dependencies..."
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          echo "Dependencies installed."
-
-
-
-  build-and-publish:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker image
+      - name: Create AWS credentials file for Docker build
+        run: |
+          mkdir -p /tmp/.aws
+          echo "[default]" > /tmp/.aws/credentials
+          echo "aws_access_key_id = ${{ env.AWS_ACCESS_KEY_ID }}" >> /tmp/.aws/credentials
+          echo "aws_secret_access_key = ${{ env.AWS_SECRET_ACCESS_KEY }}" >> /tmp/.aws/credentials
+          echo "aws_session_token = ${{ env.AWS_SESSION_TOKEN }}" >> /tmp/.aws/credentials
+      
+      - name: Build and push Docker image to ECR
         id: docker_build
-        uses: docker/build-push-action@v4
+        run: |
+          IMAGE_TAG="${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}"
+          
+          # Build the image using the secure secret mount
+          docker build --secret id=aws,src=/tmp/.aws/credentials -t $IMAGE_TAG .
+          
+          # Push the image that was just built
+          docker push $IMAGE_TAG
+        # We use a manual docker build & push because docker/build-push-action doesn't support --secret
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/ai-agent-accent:latest
+          # Use OIDC here as well for consistency and security
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }} 
+          aws-region: ${{ secrets.AWS_REGION }}
 
-  
-  # build-and-push-to-ecr:
-  #   needs: build-and-test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+      - name: Render updated ECS task definition
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: AI-agent-container # Make sure this matches your task definition
+          image: ${{ needs.build-and-push.outputs.image }}
 
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ secrets.AWS_REGION }}
-
-  #     - name: Login to Amazon ECR
-  #       id: login-ecr
-  #       uses: aws-actions/amazon-ecr-login@v2
-
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v2
-
-  #     - name: Build and Push to ECR
-  #       uses: docker/build-push-action@v4
-  #       with:
-  #         context: .
-  #         push: true
-  #         tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
-
-  # deploy-to-ecs:
-  #   needs: build-and-push-to-ecr
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ secrets.AWS_REGION }}
-
-  #     - name: Render updated ECS task definition
-  #       id: render-task-def
-  #       uses: aws-actions/amazon-ecs-render-task-definition@v1
-  #       with:
-  #         task-definition: task-definition.json
-  #         container-name: AI-agent-container
-  #         image: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
-
-  #     - name: Deploy to ECS
-  #       uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-  #       with:
-  #         cluster: strong-crocodile-5j0qw1
-  #         service: ai-agent-accent-service-uwifcn5h
-  #         task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1 
+        with:
+          cluster: strong-crocodile-5j0qw1 
+          service: titanic-aws-service-bena34c4 
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}

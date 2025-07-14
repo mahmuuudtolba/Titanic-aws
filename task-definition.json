@@ -1,15 +1,15 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:us-east-1:019212531131:task-definition/ai-agent-accent:1",
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:019212531131:task-definition/titanic-aws:1",
     "containerDefinitions": [
         {
-            "name": "AI-agent-container",
+            "name": "titanic-contianer",
             "image": "hello-world",
             "cpu": 0,
             "portMappings": [
                 {
-                    "name": "ai-agent-container-80-tcp",
-                    "containerPort": 80,
-                    "hostPort": 80,
+                    "name": "titanic-contianer-5000-tcp",
+                    "containerPort": 5000,
+                    "hostPort": 5000,
                     "protocol": "tcp",
                     "appProtocol": "http"
                 }
@@ -23,7 +23,7 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/ai-agent-accent",
+                    "awslogs-group": "/ecs/titanic-aws",
                     "awslogs-create-group": "true",
                     "awslogs-region": "us-east-1",
                     "awslogs-stream-prefix": "ecs"
@@ -33,7 +33,7 @@
             "healthCheck": {
                 "command": [
                     "CMD-SHELL",
-                    "curl -f http://localhost:8501/ || exit 1"
+                    "curl -f http://localhost:5000/ || exit 1"
                 ],
                 "interval": 30,
                 "timeout": 5,
@@ -42,17 +42,12 @@
             "systemControls": []
         }
     ],
-    "family": "ai-agent-accent",
+    "family": "titanic-aws",
     "taskRoleArn": "arn:aws:iam::019212531131:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::019212531131:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
     "revision": 1,
-    "volumes": [
-        {
-            "name": "ai-agent-volume",
-            "host": {}
-        }
-    ],
+    "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
         {
@@ -95,15 +90,15 @@
         "FARGATE"
     ],
     "cpu": "1024",
-    "memory": "4096",
+    "memory": "3072",
     "ephemeralStorage": {
-        "sizeInGiB": 25
+        "sizeInGiB": 22
     },
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2025-07-06T04:41:39.574Z",
+    "registeredAt": "2025-07-14T07:47:01.078Z",
     "registeredBy": "arn:aws:iam::019212531131:root",
     "enableFaultInjection": false,
     "tags": []

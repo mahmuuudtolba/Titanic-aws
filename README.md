@@ -3,7 +3,7 @@
 This is an implementation of a machine learning classification model for predicting Titanic passenger survival.
 
 ## Requirements
-- Python 3.10 or later
+- Python 3.11 or later
 
 ## Installation 
 
@@ -32,11 +32,6 @@ python run_simple_tests.py
 # Run all simple tests
 pytest tests/test_simple.py -v
 
-# Run a specific test class
-pytest tests/test_simple.py::TestSimpleDataIngestion -v
-
-# Run a specific test method
-pytest tests/test_simple.py::TestSimpleDataIngestion::test_data_ingestion_initialization -v
 ```
 
 ### See available tests
@@ -80,7 +75,7 @@ docker run --name titanic-container -p 5000:5000 -v ./.aws:/root/.aws:ro titanic
 │   ├── data_processing.py # Data preprocessing and feature engineering
 │   └── model_training.py  # Model training with LightGBM
 ├── tests/                  # Test suite
-│   └── test_simple.py     # Simple tests for beginners
+│   └── test_overall.py     # Simple tests for beginners
 ├── pipeline/              # Training pipeline
 ├── templates/             # Flask templates
 ├── config/               # Configuration files

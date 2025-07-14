@@ -14,7 +14,7 @@ class DataIngestion:
     def __init__(self , config):
         self.config = config["data_ingestion"]
         self.bucket_name = self.config["bucket_name"]
-        self.file_name = self.config["bucket_file_name"]
+        self.file_name = self.config["file_name"]
         self.train_ratio = self.config["train_ratio"]
 
 
