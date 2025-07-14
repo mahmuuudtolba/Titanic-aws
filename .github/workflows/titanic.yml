@@ -89,7 +89,7 @@ jobs:
           image: "${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest"
 
       - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1 
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2 
         with:
           cluster: strong-crocodile-5j0qw1 
           service: titanic-aws-service-bena34c4 
