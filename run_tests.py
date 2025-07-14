@@ -53,6 +53,8 @@ def run_tests():
             print("   ❌ Some tests failed!")
             print(result.stdout)
             return False
+        
+        return True
 
     except Exception as e:
         print(f"❌ Error running tests: {e}")
