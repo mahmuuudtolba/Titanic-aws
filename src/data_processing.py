@@ -35,7 +35,7 @@ class DataProcessor:
 
             df['HasCabin'] = df['Cabin'].notnull().astype(int)
 
-            df['Title'] = df['Name'].str.extract(' ([A-Za-z]+)\.', expand=False).map(
+            df['Title'] = df['Name'].str.extract(r' ([A-Za-z]+)\.', expand=False).map(
                 {'Mr': 0, 'Miss': 1, 'Mrs': 2, 'Master': 3, 'Rare': 4}
             ).fillna(4)
 
